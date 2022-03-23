@@ -1,6 +1,7 @@
 package com.ubaya.advweek4.view
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -10,9 +11,13 @@ import com.ubaya.advweek4.R
 import com.ubaya.advweek4.util.loadImage
 import com.ubaya.advweek4.viewmodel.DetailViewModel
 import com.ubaya.advweek4.viewmodel.ListViewModel
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_student_detail.*
 import kotlinx.android.synthetic.main.fragment_student_list.*
 import kotlinx.android.synthetic.main.student_list_item.view.*
+import java.util.concurrent.TimeUnit
 
 /**
  * A simple [Fragment] subclass.
@@ -40,16 +45,48 @@ class StudentDetailFragment : Fragment() {
         observeViewModel()
     }
     private fun observeViewModel() {
-        viewModel.studentLiveData.observe(viewLifecycleOwner){
-            val student = viewModel.studentLiveData.value
+        viewModel.studentLiveData.observe(viewLifecycleOwner) {
+            val student = it
+//            viewModel.studentLiveData.value?.let {student->
+//                editID.setText(it.id)
+//                editDOB.setText(it.dob)
+//                editName.setText(it.name)
+//                editPhone.setText(it.phone)
+//                imageView2.loadImage(it.photoURL,progressBarPicture)
+//                buttonNotif.setOnClickListener {
+//                    Observable.timer(5,TimeUnit.SECONDS)
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe{
+//                            Log.d("mynotif","notification delayed after 5 second")
+//                            MainActivity.showNotification(student.name,"Notification created",
+//                                R.drawable.ic_baseline_notifications_24)
+//                        }
+//
+//                }
+//            }
             student?.let {
                 editID.setText(it.id)
                 editDOB.setText(it.dob)
                 editName.setText(it.name)
                 editPhone.setText(it.phone)
-                imageView2.loadImage(it.photoURL,progressBarPicture)
-            }
+                imageView2.loadImage(it.photoURL, progressBarPicture)
+                buttonNotif.setOnClickListener {
+                    Observable.timer(5, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            Log.d("mynotif", "notification delayed after 5 second")
+                            student.name?.let { it1 ->
+                                MainActivity.showNotification(
+                                    it1, "Notification created",
+                                    R.drawable.ic_baseline_notifications_24
+                                )
+                            }
+                        }
+                }
 
+            }
         }
     }
 }
